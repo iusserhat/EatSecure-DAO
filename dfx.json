@@ -1,0 +1,26 @@
+{
+  "canisters": {
+    "eatsecuredaomo_backend": {
+      "main": "src/eatsecuredaomo_backend/main.mo",
+      "type": "motoko"
+    },
+    "eatsecuredaomo_frontend": {
+      "dependencies": [
+        "eatsecuredaomo_backend"
+      ],
+      "source": [
+        "src/eatsecuredaomo_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "eatsecuredaomo_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
