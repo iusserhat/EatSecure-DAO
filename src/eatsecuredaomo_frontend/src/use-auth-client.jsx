@@ -1,24 +1,37 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import { AuthClient } from '@dfinity/auth-client';
+import { AuthClient } from "@dfinity/auth-client";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { canisterId, createActor } from "declarations/eatsecuredaomo_backend/index.js";
 
 const AuthContext = createContext();
 
 const defaultOptions = {
+  /**
+   *  @type {import("@dfinity/auth-client").AuthClientCreateOptions}
+   */
   createOptions: {
     idleOptions: {
+      // Set to true if you do not want idle functionality
       disableIdle: true,
     },
   },
+  /**
+   * @type {import("@dfinity/auth-client").AuthClientLoginOptions}
+   */
   loginOptions: {
     identityProvider:
       process.env.DFX_NETWORK === "ic"
         ? "https://identity.ic0.app"
-        : `http://be2us-64aaa-aaaaa-qaabq-cai.localhost:4943`,
-  
+        : `http://be2us-64aaa-aaaaa-qaabq-cai.localhost:4943/`,
   },
 };
 
+/**
+ *
+ * @param options - Options for the AuthClient
+ * @param {AuthClientCreateOptions} options.createOptions - Options for the AuthClient.create() method
+ * @param {AuthClientLoginOptions} options.loginOptions - Options for the AuthClient.login() method
+ * @returns
+ */
 export const useAuthClient = (options = defaultOptions) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authClient, setAuthClient] = useState(null);
@@ -27,78 +40,49 @@ export const useAuthClient = (options = defaultOptions) => {
   const [whoamiActor, setWhoamiActor] = useState(null);
 
   useEffect(() => {
-    const initAuthClient = async () => {
-      try {
-        const client = await AuthClient.create(options.createOptions);
-        setAuthClient(client);
-        await updateClient(client);
-      } catch (error) {
-        console.error("Failed to create AuthClient:", error);
-      }
-    };
-
-    initAuthClient();
+    // Initialize AuthClient
+    AuthClient.create(options.createOptions).then(async (client) => {
+      updateClient(client);
+    });
   }, []);
 
-  const login = async () => {
-    if (!authClient) {
-      console.error("AuthClient is not initialized");
-      return;
-    }
-
-    try {
-      await authClient.login({
-        ...options.loginOptions,
-        onSuccess: async () => {
-          await updateClient(authClient);
-        },
-      });
-    } catch (error) {
-      console.error("Login failed:", error);
-    }
+  const login = () => {
+    authClient.login({
+      ...options.loginOptions,
+      onSuccess: () => {
+        updateClient(authClient);
+      },
+    });
   };
 
-  const updateClient = async (client) => {
-    try {
-      const isAuthenticated = await client.isAuthenticated();
-      setIsAuthenticated(isAuthenticated);
+  async function updateClient(client) {
+    const isAuthenticated = await client.isAuthenticated();
+    setIsAuthenticated(isAuthenticated);
 
-      if (isAuthenticated) {
-        const identity = client.getIdentity();
-        setIdentity(identity);
+    const identity = client.getIdentity();
+    setIdentity(identity);
 
-        const principal = identity.getPrincipal();
-        setPrincipal(principal);
+    const principal = identity.getPrincipal();
+    setPrincipal(principal);
 
-        const actor = await createActor(canisterId, {
-          agentOptions: {
-            identity,
-          },
-        });
+    setAuthClient(client);
 
-        setWhoamiActor(actor);
+    const actor = await createActor(canisterId, {
+      agentOptions: {
+        identity,
+      },
+    });
 
-        const result = await actor.signUpWithInternetIdentity();
-        console.log("Signup result:", result);
-      }
-    } catch (error) {
-      console.error("Failed to update client:", error);
-    }
-  };
+    setWhoamiActor(actor);
 
-  const logout = async () => {
-    try {
-      if (authClient) {
-        await authClient.logout();
-        setIsAuthenticated(false);
-        setIdentity(null);
-        setPrincipal(null);
-        setWhoamiActor(null);
-      }
-    } catch (error) {
-      console.error("Failed to log out:", error);
-    }
-  };
+    const result = await actor.signUpWithInternetIdentity();
+    console.log(result);
+  }
+
+  async function logout() {
+    await authClient?.logout();
+    await updateClient(authClient);
+  }
 
   return {
     isAuthenticated,
@@ -111,6 +95,9 @@ export const useAuthClient = (options = defaultOptions) => {
   };
 };
 
+/**
+ * @type {React.FC}
+ */
 export const AuthProvider = ({ children }) => {
   const auth = useAuthClient();
 

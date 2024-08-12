@@ -1,19 +1,21 @@
-import React, { useState } from "react";
-import { createActor, eatsecuredaomo_backend } from "../../declarations/eatsecuredaomo_backend/index.js";
+import { useState } from "react";
+import {
+  createActor,
+  eatsecuredaomo_backend,
+} from "declarations/eatsecuredaomo_backend/index.js";
 import { AuthClient } from "@dfinity/auth-client";
 import { HttpAgent } from "@dfinity/agent";
 import Box from "@mui/material/Box";
 
 export default function Header() {
   const [greet, setGreet] = useState("");
-  let actor = eatsecuredaomo_backend;
-
+  let actor = icpaws_backend;
   const handleGreet = async (e) => {
     e.preventDefault();
     try {
       const greeting = await actor.greet();
-      console.log(greeting);
-      setGreet(greeting);
+      console.log(greeting)
+      setGreet(greeting)
     } catch (error) {
       console.error(error);
     }
@@ -28,6 +30,7 @@ export default function Header() {
           process.env.DFX_NETWORK === "ic"
             ? "https://identity.ic0.app"
             : "http://be2us-64aaa-aaaaa-qaabq-cai.localhost:4943",
+
         onSuccess: async () => {
           const identity = authClient.getIdentity();
           const agent = new HttpAgent({ identity });
@@ -53,18 +56,19 @@ export default function Header() {
       sx={{ pb: 3, borderRadius: "10px" }}
     >
       <img
-  src="/logo.png"
-  alt="Your logo"
-  width="1000000"
-  style={{ borderRadius: "30%", paddingLeft: "80px" }}
-/>
+        src="/logo.png"
+        alt="Your logo"
+        width="1000"
+        style={{ borderRadius: "30px", paddingLeft: "80px" }}
+      />
 
       <div>
         <button onClick={handleLogin}>Login!</button> <br />
         <br />
         <button onClick={handleGreet}>Click Me!</button> <br/><br/><br/>
-        {greet}
+          {greet}
       </div>
+       
     </Box>
   );
 }

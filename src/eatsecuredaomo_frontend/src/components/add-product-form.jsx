@@ -3,6 +3,8 @@ import React, { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
+
+
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
@@ -15,33 +17,26 @@ import FormProvider, { RHFTextField } from "./hook-form";
 import { eatsecuredaomo_backend } from "../../../declarations/eatsecuredaomo_backend";
 import { useSnackbar } from "notistack";
 
-// ----------------------------------------------------------------------
 
 export default function AddProductForm({ open, onClose, principal, mutateProducts }) {
   const [imageData, setImageData] = useState("");
   const { enqueueSnackbar } = useSnackbar();
 
   const NewProductSchema = Yup.object().shape({
-    id: Yup.string().required(),
     name: Yup.string().required(),
-    production_date: Yup.string().required(), // Changed to string
-    expiration_date: Yup.string().required(), // Changed to string
-    image: Yup.string().required(), 
-    owner: Yup.string().required(),
-    description: Yup.string().required(), // Added description validation
+    production_date: Yup.string().required(),
+    expiration_date: Yup.string().required(),
+    image: Yup.string().required(),
   });
 
   const defaultValues = useMemo(
     () => ({
-      id: "",
       name: "",
       production_date: "",
       expiration_date: "",
       image: "",
-      owner: principal, // Automatically set to principal
-      description: "", // Added description
     }),
-    [principal],
+    [],
   );
 
   const methods = useForm({
@@ -70,23 +65,24 @@ export default function AddProductForm({ open, onClose, principal, mutateProduct
       reader.readAsDataURL(file);
     }
   };
-
   const onSubmit = handleSubmit(async (data) => {
     try {
-      const formData = { ...data, image: imageData };
+      const formData = { ...data, image: imageData, owner: principal };
       await eatsecuredaomo_backend.createProduct(formData);
       mutateProducts();
-      enqueueSnackbar("Your product has been added successfully!");
+      enqueueSnackbar("Your Product is added to our database successufully!");
       onClose();
       console.info("DATA", data);
       reset();
       setImageData("");
     } catch (error) {
-      console.error("Error adding product:", error);
-      enqueueSnackbar("An error occurred while adding the product. Please try again.", { variant: "error" });
+      console.error(error);
     }
   });
 
+
+
+  
   return (
     <Dialog
       fullWidth
@@ -97,7 +93,7 @@ export default function AddProductForm({ open, onClose, principal, mutateProduct
         sx: { maxWidth: 750 },
       }}
     >
-      <FormProvider methods={methods} onSubmit={onSubmit}>
+      <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
         <DialogTitle>Add New Product</DialogTitle>
 
         <DialogContent>
@@ -115,7 +111,6 @@ export default function AddProductForm({ open, onClose, principal, mutateProduct
             <RHFTextField name="name" label="Product Name" required />
             <RHFTextField name="production_date" label="Production Date" required />
             <RHFTextField name="expiration_date" label="Expiration Date" required />
-            <RHFTextField name="description" label="Description" required multiline rows={4} />
           </Box>
           <Stack
             direction="column"
@@ -132,7 +127,7 @@ export default function AddProductForm({ open, onClose, principal, mutateProduct
               onChange={handleFileChange}
               accept="image/*"
               style={{ display: "none" }}
-            />
+            />{" "}
             {imageData && (
               <img src={imageData} alt="product" height={200} width={400} />
             )}

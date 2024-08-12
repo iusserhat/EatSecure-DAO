@@ -1,8 +1,26 @@
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
-import ProductItem from "./product-item"; // Düzeltilmiş isim
+import ProductItem from "./product-item"; 
+import { eatsecuredaomo_backend } from 'declarations/eatsecuredaomo_backend/index.js'; // Canister importu
 import { Typography } from "@mui/material";
 
-export default function ProductList({ products }) {
+export default function ProductList() {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    // Backend'den ürün verilerini çekme
+    const fetchProducts = async () => {
+      try {
+        const fetchedProducts = await eatsecuredaomo_backend.listProducts();
+        setProducts(fetchedProducts);
+      } catch (error) {
+        console.error("Ürünler çekilirken bir hata oluştu:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []); // Boş bağımlılık dizisi, bileşen ilk yüklendiğinde çalışır
+
   return (
     <>
       <Box
@@ -14,16 +32,15 @@ export default function ProductList({ products }) {
           md: "repeat(3, 1fr)",
         }}
       >
-        {products.length > 0 ? (
-          products.map((product) => (
-            <ProductItem key={product.id} product={product} /> // Düzeltilmiş isim
-          ))
-        ) : (
-          <Typography variant="h4" padding={10}>
-            Şeffaf ürün takibi için yenilikçi platform!
-          </Typography>
-        )}
+        {products.map((product) => (
+          <ProductItem key={product.id} product={product} />
+        ))}
       </Box>
+      {!products.length && (
+        <Typography variant="h4" padding={10}>
+          "Şeffaf ve Yenilikçi Ürün Takip Platformu"
+        </Typography>
+      )}
     </>
   );
 }

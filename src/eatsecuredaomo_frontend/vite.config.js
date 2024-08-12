@@ -4,6 +4,7 @@ import { defineConfig } from 'vite';
 import environment from 'vite-plugin-environment';
 import dotenv from 'dotenv';
 
+// Load environment variables
 dotenv.config({ path: '../../.env' });
 
 export default defineConfig({
@@ -19,8 +20,8 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/foo": {
-        target: "http://127.0.0.1.4943:",
+      "/api": {
+        target: "http://127.0.0.1:4943", // Corrected URL
         changeOrigin: true,
       },
     },

@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 
-
-
 const styles = {
   padding: "20px 50px",
   border: "none",

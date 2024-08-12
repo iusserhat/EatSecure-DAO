@@ -1,9 +1,9 @@
+import { useAuth, AuthProvider } from "./use-auth-client";
 import CreateProductForm from "./createProduct";
 import ProductList from "./components/product-list";
 import Box from "@mui/material/Box";
 import { useState, useEffect } from "react";
 import React from "react";
-import { useAuth, AuthProvider } from "./use-auth-client";
 import { HttpAgent } from "@dfinity/agent";
 import LoggedIn from "./LoggedIn"; 
 import LoggedOut from "./LoggedOut";
